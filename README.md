@@ -6,26 +6,45 @@ The project focuses on building a maintainable and scalable backend architecture
 
 ## Architecture
 
-```text
-                    ┌───────────────┐
-                    │    Client     │
-                    └───────┬───────┘
-                            │
-                            ▼
-                    ┌───────────────┐
-                    │  API Gateway  │
-                    └───────┬───────┘
-                            │
-             ┌──────────────┼──────────────┐
-             │              │              │
-             ▼              ▼              ▼
-      ┌────────────┐ ┌────────────┐ ┌────────────┐
-      │ Auth       │ │ Product    │ │ Order      │
-      │ Service    │ │ Service    │ │ Service    │
-      └────────────┘ └────────────┘ └────────────┘
-             │              │              │
-             ▼              ▼              ▼
-        Database       Database       Database
+```mermaid
+graph LR
+    subgraph "External"
+        C[Client<br/>Web/Mobile]
+    end
+    
+    subgraph "Gateway Layer"
+        G[API Gateway<br/>Kong]
+    end
+    
+    subgraph "Microservices"
+        A[Auth Service<br/>Port: 3000]
+        P[Product Service<br/>Port: 4100]
+        O[Order Service<br/>Port: 4000]
+    end
+    
+    subgraph "Data Layer"
+        DB1[(Auth DB)]
+        DB2[(Product DB)]
+        DB3[(Order DB)]
+    end
+    
+    C -->|HTTP Request| G
+    G -->|Route: /auth/*| A
+    G -->|Route: /items/*| P
+    G -->|Route: /api/orders/*| O
+    A --> DB1
+    P --> DB2
+    O --> DB3
+    
+    classDef client fill:#8E44AD,color:#fff
+    classDef gateway fill:#4A90D9,color:#fff
+    classDef service fill:#27AE60,color:#fff
+    classDef db fill:#F39C12,color:#fff
+    
+    class C client
+    class G gateway
+    class A,P,O service
+    class DB1,DB2,DB3 db
 ```
 
 The **API Gateway** acts as the entry point for the platform. It receives external requests and forwards them to the appropriate internal service.
